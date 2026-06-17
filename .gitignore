@@ -1,0 +1,14 @@
+project-sample/*
+*.out
+*.vcd
+*.log
+*.vcd.gz
+*.log.gz
+*.vcd.bz2
+*.log.bz2
+*.vcd.xz
+*.log.xz
+*.vcd.lzma
+*.log.lzma
+*.vcd.zst
+*.log.zst
