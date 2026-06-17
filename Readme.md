@@ -96,6 +96,76 @@ The Docker image is based on **Ubuntu 20.04** and installs Icarus Verilog, Make,
 - `sim/cache_controller_tb.log` — test results and `$display` output
 - `sim/cache_controller_tb.vcd` — waveform dump (view with GTKWave)
 
+## Implementation Details
+
+This project extends the professor's sample with a **4-way set-associative** architecture:
+
+### Parameter Comparison
+
+| Parameter | Your Design | Direct-Mapped (Sample) | Notes |
+|-----------|-------------|------------------------|-------|
+| Associativity | 4-way | 1-way | 256 sets × 4 ways = 1024 blocks |
+| Index | 8 bits [10:3] | 10 bits | Reduced due to set structure |
+| Tag | 10 bits [20:11] | 8 bits | Increased due to reduced index |
+| Block offset | 3 bits [2:0] | 3 bits | 8 words per block |
+| Address width | 21 bits | 21 bits | 8 MiB word-addressable memory |
+
+### Policies Implemented
+
+| Policy | Implementation |
+|--------|----------------|
+| **Write-back** | Dirty bit per cache line; memory write only on eviction |
+| **Write-allocate** | Write miss fetches the block, then writes to cache |
+| **LRU replacement** | 2-bit counter per way (0 = victim, 3 = MRU); invalid ways preferred on miss |
+
+## Project Organization
+
+```
+CACHE/
+├── src/cache_controller.sv   # 4-way cache FSM + LRU logic
+├── src/memory.sv             # 8 MiB main memory model
+├── tb/cache_controller_tb.sv # 7 automated test cases
+├── tb/generate_data.py       # Memory initialization script
+├── include/defs.svh          # Shared SystemVerilog parameters
+├── Makefile                  # Build and simulation control
+├── Dockerfile                # Ubuntu 20.04 + Icarus Verilog v12
+├── .gitignore
+└── Readme.md
+```
+
+### Reference Implementation
+
+The `project-sample/` folder contains your professor's direct-mapped cache reference implementation. Your design differs in:
+- **4-way set-associative structure** instead of direct-mapped
+- **LRU replacement logic** with per-way 2-bit counters
+- **Write-allocate behavior** for write misses
+
+## Test Coverage
+
+All 7 automated tests pass:
+- Cold miss (empty cache, tag 0)
+- Cache hit (subsequent access to same address)
+- LRU eviction (4 ways full, 5th access replaces LRU victim)
+- Write-back behavior (dirty line evicted, memory updated)
+- Write-allocate behavior (write miss fetches block first)
+- Tag and index address field extraction
+- Block offset alignment
+
+## Icarus Verilog v12 Requirement
+
+Ubuntu 20.04 ships with Icarus Verilog 10.x, which has incomplete SystemVerilog support. The **Dockerfile builds v12 from source** for full compatibility:
+
+```bash
+docker build -t cache-sim .
+docker run --rm cache-sim
+```
+
+Or use the Make shortcut:
+
+```bash
+make docker
+```
+
 ## Clean
 
 ```bash
