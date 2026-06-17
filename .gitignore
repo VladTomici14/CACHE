@@ -1,7 +1,11 @@
-project-sample/*
+# Build artifacts
+build/
 *.out
+
+# Simulation outputs
+sim/*.log
+sim/*.vcd
 *.vcd
-*.log
 *.vcd.gz
 *.log.gz
 *.vcd.bz2
@@ -12,3 +16,30 @@ project-sample/*
 *.log.lzma
 *.vcd.zst
 *.log.zst
+
+# Project sample (reference only)
+project-sample/*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Generated data
+tb/mem_data.txt
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS-specific files
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
